@@ -1,0 +1,3 @@
+tk
+infi.systray
+pynput
