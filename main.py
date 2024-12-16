@@ -6,13 +6,14 @@ isDrawingGrid = False
 gridWin = None
 gridCanvas = None
 
-maxSelections = 5
+maxSelections = 4
 
 selectionsMade = 0
 gridStartX = 0
 gridStartY = 0
 gridWidth = 0
 gridHeight = 0
+selectionIndex = 0
 
 mouse = Controller()
 
@@ -29,7 +30,7 @@ def CreateGridWin():
     gridWin.attributes('-toolwindow', True)
 
     gridWin.bind('<Escape>', lambda e: CancelSelection())
-    gridWin.bind('<Enter>', lambda e: MakeSelection())
+    gridWin.bind('<Return>', lambda e: MakeSelectionMiddle())
     gridWin.bind('a', lambda e: UpdateGrid(0))
     gridWin.bind('s', lambda e: UpdateGrid(1))
     gridWin.bind('d', lambda e: UpdateGrid(2))
@@ -77,27 +78,25 @@ def RestartGridState():
     gridWidth = gridWin.winfo_screenwidth()
     gridHeight = gridWin.winfo_screenheight()
 
-def UpdateGrid(selectIndex):
+def UpdateGrid(index):
     global gridStartX, gridStartY
     global gridWidth, gridHeight
     global selectionsMade
+    global selectionIndex
     global isDrawingGrid
 
-    print('called with')
-    print(selectIndex)
+    selectionIndex = index
 
     selectionsMade += 1
     if (selectionsMade >= maxSelections):
-        gridWin.destroy()
         MakeSelection()
-        isDrawingGrid = False
         return
 
     gridHeight /= 2
     gridWidth /= 4
 
-    gridStartX += gridWidth * (selectIndex % 4)
-    if selectIndex > 3:
+    gridStartX += gridWidth * (index % 4)
+    if index > 3:
         gridStartY += gridHeight
 
     DrawGrid()
@@ -131,12 +130,49 @@ def DrawGrid():
     gridWin.mainloop()
 
 def MakeSelection():
-    mouseX = gridStartX + gridWidth / 2
-    mouseY = gridStartY + gridHeight / 2
+    global gridWin
+    global isDrawingGrid
+    global mouse
 
-    mouse.position = (mouseX, mouseY)
+    mouse.position = GetGridMiddle()
     mouse.press(Button.left)
     mouse.release(Button.left)
+
+    gridWin.destroy()
+    isDrawingGrid = False
+
+def MakeSelectionMiddle():
+    global gridWin
+    global gridWidth, gridHeight
+    global gridStartX,gridStartY
+    global isDrawingGrid
+    global mouse
+
+    x = gridStartX + gridWidth / 2
+    y = gridStartY + gridHeight / 2
+
+    mouse.position = (x, y)
+    mouse.press(Button.left)
+    mouse.release(Button.left)
+
+    gridWin.destroy()
+    isDrawingGrid = False
+
+def GetGridMiddle():
+    global gridWidth, gridHeight
+    global gridStartX, gridStartY
+    global selectionIndex
+
+    column = selectionIndex % 4
+    row = 0 if selectionIndex < 4 else 1
+
+    cellWidth = gridWidth / 4
+    cellHeight = gridHeight / 2
+
+    middleX = gridStartX + column * cellWidth + cellWidth / 2
+    middleY = gridStartY + row * cellHeight + cellHeight / 2
+
+    return middleX, middleY
 
 def Exit():
     print('exit')
