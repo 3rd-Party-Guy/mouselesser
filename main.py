@@ -6,7 +6,7 @@ isDrawingGrid = False
 gridWin = None
 gridCanvas = None
 
-maxSelections = 4
+maxSelections = 5
 
 selectionsMade = 0
 gridStartX = 0
@@ -28,7 +28,8 @@ def CreateGridWin():
     gridWin.attributes('-transparentcolor', 'red')
     gridWin.attributes('-toolwindow', True)
 
-    gridWin.bind('<Escape>', lambda e: gridWin.destroy())
+    gridWin.bind('<Escape>', lambda e: CancelSelection())
+    gridWin.bind('<Enter>', lambda e: MakeSelection())
     gridWin.bind('a', lambda e: UpdateGrid(0))
     gridWin.bind('s', lambda e: UpdateGrid(1))
     gridWin.bind('d', lambda e: UpdateGrid(2))
@@ -39,6 +40,13 @@ def CreateGridWin():
     gridWin.bind(';', lambda e: UpdateGrid(7))
 
     gridWin.focus_force()
+
+def CancelSelection():
+    global gridWin
+    global isDrawingGrid
+
+    gridWin.destroy()
+    isDrawingGrid = False
 
 def CreateGridCanvas():
     global gridWin
