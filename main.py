@@ -1,12 +1,13 @@
 import tkinter
 import keyboard
 from pynput.mouse import Controller, Button
+import time
 
 isDrawingGrid = False
 gridWin = None
 gridCanvas = None
 
-maxSelections = 4
+maxSelections = 5
 
 selectionsMade = 0
 gridStartX = 0
@@ -102,8 +103,8 @@ def UpdateGrid(index):
     DrawGrid()
 
 def DrawGrid():
-    global gridWidth
-    global gridHeight
+    global gridStartX, gridStartY
+    global gridWidth, gridHeight
     global gridWin
     global gridCanvas
 
@@ -112,10 +113,17 @@ def DrawGrid():
     gridCubeWidth = gridWidth / 4
     gridCubeHeight = gridHeight / 2
 
-    lineFill = 'black'
-    lineSize = 2
+    lineFill = 'blue'
+    lineSize = 1
 
     gridCanvas.delete('all')
+
+    #borders
+    gridCanvas.create_line(0, gridStartY, gridWin.winfo_screenwidth(), gridStartY)
+    gridCanvas.create_line(0, gridStartY + gridHeight, gridWin.winfo_screenwidth(), gridStartY + gridHeight)
+
+    gridCanvas.create_line(gridStartX, 0, gridStartX, gridWin.winfo_height())
+    gridCanvas.create_line(gridStartX + gridWidth, 0, gridStartX + gridWidth, gridWin.winfo_height())
 
     # horizontal line
     gridCanvas.create_line(gridStartX, gridStartY + gridCubeHeight, gridStartX + gridWidth, gridStartY + gridCubeHeight, fill=lineFill, width=lineSize)
@@ -134,12 +142,20 @@ def MakeSelection():
     global isDrawingGrid
     global mouse
 
-    mouse.position = GetGridMiddle()
-    mouse.press(Button.left)
-    mouse.release(Button.left)
-
     gridWin.destroy()
     isDrawingGrid = False
+
+    if keyboard.is_pressed('alt'):
+        print('doing alt behaviour renewed')
+        mouse.press(Button.left)
+        time.sleep(0.1)
+        mouse.position = GetCellMiddle()
+        time.sleep(0.1)
+        mouse.release(Button.left)
+    else:
+        mouse.position = GetCellMiddle()
+        mouse.click(Button.left, 1)
+
 
 def MakeSelectionMiddle():
     global gridWin
@@ -148,17 +164,24 @@ def MakeSelectionMiddle():
     global isDrawingGrid
     global mouse
 
+    gridWin.destroy()
+    isDrawingGrid = False
+    
     x = gridStartX + gridWidth / 2
     y = gridStartY + gridHeight / 2
 
-    mouse.position = (x, y)
-    mouse.press(Button.left)
-    mouse.release(Button.left)
+    if keyboard.is_pressed('alt'):
+        mouse.press(Button.left)
+        time.sleep(0.1)
+        mouse.position = (x, y)
+        time.sleep(0.1)
+        mouse.release(Button.left)
+    else:
+        mouse.position = (x, y)
+        mouse.click(Button.left, 1)
 
-    gridWin.destroy()
-    isDrawingGrid = False
 
-def GetGridMiddle():
+def GetCellMiddle():
     global gridWidth, gridHeight
     global gridStartX, gridStartY
     global selectionIndex
